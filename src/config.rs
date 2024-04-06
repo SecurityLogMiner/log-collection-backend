@@ -14,11 +14,6 @@ pub struct DynamoDBConfig {
     pub package: Vec<Package>
 }
 
-#[derive(Debug, Deserialize)]
-pub struct OpenSearchConfig {
-    pub delivery_stream: String,
-}
-
 // Define a configuration struct above and throw it in the mix
 #[derive(Debug, Deserialize)]
 pub struct Config {

@@ -18,6 +18,9 @@ ratatui = "0.26.1"
 crossterm = "0.27.0"
 itertools = "0.12.1"
 unicode-width = "0.1.11"
+chrono = "0.4.37"
+notify = { version = "6.1.1", default-features = false, features = ["macos_kqueue"] }
+futures-util = "0.3.30"
 
 [dependencies.uuid]
 version = "1.7.0"
