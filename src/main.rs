@@ -122,6 +122,11 @@ fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
     Ok(())
 }
 
+
+// Start a process in the background that handles all threads. 
+// The threads represent incoming log data from the log file.
+// Each thread has a transmitter and receiver, aka a channel that needs
+// to run asynchronously, in the background.
 async fn start_collection_service() {
     /*
     let config_data = read_config();
