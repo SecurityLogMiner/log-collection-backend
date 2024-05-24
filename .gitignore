@@ -42,8 +42,12 @@ client.csr
 client.key
 iamkeys.csv
 
+# ignore aws
+**/aws
 # Local .terraform directories
 **/.terraform/*
+
+*.terraform.lock.hcl
 
 # .tfstate files
 *.tfstate

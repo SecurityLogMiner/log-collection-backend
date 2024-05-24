@@ -14,26 +14,33 @@ else
     echo "Log directory already exists at: $LOG_DIR"
 fi
 
-# Set the desired Terraform version
-TERRAFORM_VERSION="1.2.9"
+if [ ! -f "/usr/local/bin/terraform" ]; then
 
-# Download Terraform. Adjust the version number as necessary.
-wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    # Set the desired Terraform version
+    TERRAFORM_VERSION="1.2.9"
 
-# Unzip the downloaded file
-unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    # Download Terraform. Adjust the version number as necessary.
+    wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-# Move the executable to a directory included in the system's PATH
-sudo mv terraform /usr/local/bin/
+    # Unzip the downloaded file
+    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-# Remove the downloaded ZIP file
-rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    # Move the executable to a directory included in the system's PATH
+    sudo mv terraform /usr/local/bin/
 
-# Check the installation
-terraform --version
+    # Remove the downloaded ZIP file
+    rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-# Print success message
-echo "Terraform installed successfully."
+    # Check the installation
+    terraform --version
+
+    # Print success message
+    echo "Terraform installed successfully."
+
+else
+    echo "Terraform is already installed."
+    terraform --version
+fi
 
 # Check if AWS CLI is already installed
 if command -v aws >/dev/null 2>&1; then
@@ -65,13 +72,4 @@ else
     echo "Adding Rust to the shell environment..."
     source $HOME/.cargo/env
 
-    # Add Rust to the shell initialization file for future sessions
-    if [ -n "$ZSH_VERSION" ]; then
-        SHELL_RC="$HOME/.zshrc"
-    elif [ -n "$BASH_VERSION" ]; then
-        SHELL_RC="$HOME/.bashrc"
-    else
-        SHELL_RC="$HOME/.profile"
-    fi
-    echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> $SHELL_RC
 fi
