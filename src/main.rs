@@ -128,7 +128,7 @@ fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
 // Each thread has a transmitter and receiver, aka a channel that needs
 // to run asynchronously, in the background.
 async fn start_collection_service() {
-    /*
+    
     let config_data = read_config();
     match config_data {
         Some(config) => {
@@ -146,7 +146,6 @@ async fn start_collection_service() {
         }
         None => panic!("Error reading configuration."),
     }
-    */
     write_to_file("Starting Log Collection service...", 
                   "collection.log").expect("Failed to write to file");
     println!("Starting Log Collection service...");
