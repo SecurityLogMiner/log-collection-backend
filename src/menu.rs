@@ -1,103 +1,79 @@
-use crossterm::{
-    event::{self, KeyCode, KeyEventKind},
-    execute,
-    terminal::{
-        disable_raw_mode, enable_raw_mode, EnterAlternateScreen,
-        LeaveAlternateScreen,
-    },
-    ExecutableCommand,
-};
-use ratatui::{
-    prelude::{CrosstermBackend, Stylize, Terminal, Rect, Layout, Direction,
-        Constraint
-    },
-    widgets::*,
-};
-use std::io::{self, stdout, Write, Result};
 
-#[derive(Debug, Clone)]
-struct Item {
-    name: String,
-    description: String,
+use crate::producer;
+use crate::config::read_config;
+use std::io::{self, Write};
+use std::fs::OpenOptions;
+use std::fs;
+use chrono::{Utc, Datelike, Timelike};
+
+pub fn read_input(prompt: &str) -> String {
+    print!("{}", prompt);
+    io::stdout().flush().expect("Failed to flush stdout");
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read user input");
+    input
 }
 
-impl Item {
-    fn new(name: &str, description: &str) -> Self {
-        Self {
-            name: name.to_string(),
-            description: description.to_string(),
-        }
-    }
-}
-
-pub fn 
-show_menu() -> Result<()> {
-    stdout().execute(EnterAlternateScreen)?;
-    enable_raw_mode()?;
-    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-    terminal.clear()?;
-    let mut out = io::stdout();
-
-    // put this in the state
-    let items = vec![
-        Item::new("Item 1", "Description for Item 1"),
-        Item::new("Item 2", "Description for Item 2"),
-        Item::new("Item 3", "Description for Item 3"),
-    ];
-
-    let mut selected_index = 0;
-
-    loop {
-        terminal.clear()?;
-        terminal.draw(|frame| {
-            for (i, item) in items.iter().enumerate() {
-                if i == selected_index {
-                    print!("> {} | ", item.name);
-                } else {
-                    print!("  {} | ", item.name);
-                }
-            }
-
-            let description = &items[selected_index].description;
-            println!(" {}", description);
-
-            let layout = Layout::default()
-                .direction(Direction::Vertical)
-                .constraints(vec![
-                    Constraint::Percentage(50),
-                    Constraint::Percentage(50),
-                ])
-                .split(frame.size());
-            frame.render_widget(
-                Paragraph::new("Top")
-                    .block(Block::new().borders(Borders::ALL)),
-                layout[0]);
-            frame.render_widget(
-                Paragraph::new("Bottom")
-                    .block(Block::new().borders(Borders::ALL)),
-                layout[1]);
-        })?;
-
-        if let event::Event::Key(key) = event::read()? {
-            if key.kind == KeyEventKind::Press
-                && key.code == KeyCode::Char('q')
-            {
-                break;
-            }
-            if key.code == KeyCode::Up {
-                if selected_index > 0 {
-                    selected_index -= 1;
-                }
-            }
-            if key.code == KeyCode::Down {
-                if selected_index < items.len() - 1 {
-                    selected_index += 1;
-                }
-            }
-        }
-    }
-
-    stdout().execute(LeaveAlternateScreen)?;
-    disable_raw_mode()?;
+fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
+    let current_time = Utc::now();
+    let formatted_time = current_time.format("%Y-%m-%d %H:%M:%S").to_string();
+    let message_with_time = format!("[{}] {}", formatted_time, message);
+    let mut file = OpenOptions::new().create(true).append(true).open(file_path)?;
+    writeln!(file, "{}", message_with_time)?;
     Ok(())
+}
+
+// Start a process in the background that handles all threads. 
+// The threads represent incoming log data from the log file.
+// Each thread has a transmitter and receiver, aka a channel that needs
+// to run asynchronously, in the background.
+pub async fn start_collection_service() {
+    
+    let config_data = read_config();
+    match config_data {
+        Some(config) => {
+            println!("{config:?}");
+
+            if let Err(e) = producer::start_log_stream(config.dynamodb).await {
+                let str_error = format!("Log stream error: {}", e);
+                write_to_file(&str_error, 
+                    "collection.log").expect("Failed to write to file");
+            }
+            write_to_file("Starting Log Collection service...", 
+                          "collection.log").expect("Failed to write to file");
+            println!("Starting Log Collection service...");
+
+        }
+        None => panic!("Error reading configuration."),
+    }
+    write_to_file("Starting Log Collection service...", 
+                  "collection.log").expect("Failed to write to file");
+    println!("Starting Log Collection service...");
+}
+
+pub fn stop_collection_service() {
+    println!("Stopping Log Collection service...");
+    write_to_file("Stopping Log Collection service...", "collection.log").expect("Failed to write to file");
+}
+
+pub fn view_collection_service_status() {
+    println!("Viewing Log Collection service status...");
+    write_to_file("Viewing Log Collection service status...", "collection.log").expect("Failed to write to file");
+}
+
+pub fn manage_collection_configurations() {
+    println!("Managing Log Collection configurations...");
+    write_to_file("Managing Log Collection configurations...", "collection.log").expect("Failed to write to file");
+}
+
+pub fn backup_collection_data() {
+    println!("Backing up Log Collection data...");
+    write_to_file("Backing up Log Collection data...", "collection.log").expect("Failed to write to file");
+}
+
+pub fn restore_collection_data() {
+    println!("Restoring Log Collection data...");
+    write_to_file("Restoring Log Collection data...", "collection.log").expect("Failed to write to file");
 }

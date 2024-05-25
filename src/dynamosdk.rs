@@ -4,13 +4,13 @@ use aws_sdk_dynamodb::primitives::Blob;
 use aws_sdk_dynamodb::{config::Region, meta::PKG_VERSION, Error};
 use aws_sdk_dynamodb::operation::create_table::{CreateTableOutput,CreateTableError};
 use aws_sdk_dynamodb::operation::put_item::{PutItemOutput, PutItemError};
-use aws_sdk_dynamodb::error::{BuildError};
+use aws_sdk_dynamodb::error::BuildError;
 
 use aws_sdk_dynamodb::types::{
     AttributeDefinition, KeySchemaElement, KeyType, ProvisionedThroughput, ScalarAttributeType,
 };
 use async_trait::async_trait;
-use std::sync::mpsc::{Receiver};
+use std::sync::mpsc::Receiver;
 use crate::dynamosdk;
 use crate::traits::DataHandler;
 use crate::config::{Config, Package};
@@ -110,7 +110,7 @@ impl DataHandler for DynamodbClientWrapper {
 
 pub fn show_dynamodb_tables() -> Result<(), Error> {
     todo!();
-    Ok(())
+    // Ok(())
 }
 
 pub async fn

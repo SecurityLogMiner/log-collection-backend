@@ -15,9 +15,6 @@ use aws_sdk_dynamodb::Client as DynamodbClient;
 use aws_sdk_dynamodb::types::AttributeValue;
 
 
-
-
-
 fn 
 tail_and_send_log(path: &str, 
                   sender: Sender<(String,String)>) -> Result<()> {
@@ -28,7 +25,7 @@ tail_and_send_log(path: &str,
 
     let stdout = tail_process.stdout.take().expect("Failed to open stdout");
 
-    let receiver = thread::spawn(move || {
+    let _receiver = thread::spawn(move || {
         let reader = BufReader::new(stdout);
         for line in reader.lines() {
             if let Ok(line) = line {
@@ -54,10 +51,10 @@ start_log_stream(config: DynamoDBConfig) -> Result<()> {
     let mut senders = Vec::new();
     let mut receivers = Vec::new();
     let mut clients = Vec::<_>::new();
-    let mut log_count = 0;
+    // let mut log_count = 0;
 
     for package in config.package {
-        log_count += 1;
+        // log_count += 1;
         if let Ok(client) = dynamosdk::create_client(package.table).await {
             clients.push(client);
         }
