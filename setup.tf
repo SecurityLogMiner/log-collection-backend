@@ -32,4 +32,4 @@ resource "aws_cloudwatch_log_stream" "security_log_stream" {
   log_group_name = aws_cloudwatch_log_group.security_logs.name
 }
 
-}
+
