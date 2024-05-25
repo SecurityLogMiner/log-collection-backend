@@ -5,8 +5,12 @@
 
 [[dynamodb.package]]
 source = "test1.log"
-table = "test1-table"
+table = "SecurityLog1"
 
 [[dynamodb.package]]
 source = "test2.log"
-table = "test2-table"
+table = "SecurityLog2"
+
+[[dynamodb.package]]
+source = "test3.log"
+table = "SecurityLog3"
