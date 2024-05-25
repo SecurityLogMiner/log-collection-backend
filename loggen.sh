@@ -1,22 +1,25 @@
 #!/bin/bash
 
-LOG_FILE="/var/log/logminer/logs/security_logs.log"
+LOG_DIR="./logs"
+LOG_PREFIX="test"
+MAX_LOGS=3
 
-# generate a random security log entry
+# Function to generate a random security log entry
 generate_log_entry() {
-    TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-    EVENT_ID=$((RANDOM % 1000 + 1000))
-    SOURCE="Security"
-    MESSAGE="Random security log message with ID $EVENT_ID"
-    echo "$TIMESTAMP - $SOURCE - Event ID: $EVENT_ID - $MESSAGE"
+  TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+  EVENT_ID=$((RANDOM % 1000 + 1000))
+  SOURCE="Security"
+  MESSAGE="Random security log message with ID $EVENT_ID"
+  echo "$TIMESTAMP - $SOURCE - Event ID: $EVENT_ID - $MESSAGE"
 }
 
-# infinite loop to generate logs periodically
-while true; do
-    LOG_ENTRY=$(generate_log_entry)
-    echo "$LOG_ENTRY" >> "$LOG_FILE"
-    sleep 30  # sleep for 30 seconds before the next log is generated
+# Create and write to the log files
+for ((i=1; i<=MAX_LOGS; i++)); do
+  LOG_FILE="${LOG_DIR}/${LOG_PREFIX}${i}.log"
+  LOG_ENTRY=$(generate_log_entry)
+  echo "$LOG_ENTRY" > "$LOG_FILE"
 done
+
 
 # directions:
 

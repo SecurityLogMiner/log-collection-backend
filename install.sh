@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the log directory path
-LOG_DIR="/var/log/logminer/logs"
+LOG_DIR="/logs"
 # TODO - add the setup to add user permissions to interact with the log directory
 # setfacl -m u:username:perms /path/to/log/file
 
