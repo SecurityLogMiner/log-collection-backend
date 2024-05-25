@@ -4,6 +4,9 @@ LOG_DIR="./logs"
 LOG_PREFIX="test"
 MAX_LOGS=3
 
+# Create the log directory if it doesn't exist
+mkdir -p "$LOG_DIR"
+
 # Function to generate a random security log entry
 generate_log_entry() {
   TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
@@ -19,6 +22,7 @@ for ((i=1; i<=MAX_LOGS; i++)); do
   LOG_ENTRY=$(generate_log_entry)
   echo "$LOG_ENTRY" > "$LOG_FILE"
 done
+
 
 
 # directions:
