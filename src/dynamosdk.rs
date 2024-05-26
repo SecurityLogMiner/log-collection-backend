@@ -54,7 +54,7 @@ impl DataHandler for DynamodbClientWrapper {
                             .send(); 
         let table_names = tables.collect::<Result<Vec<_>,_>>().await.unwrap();
         for tbl in table_names {
-            println!("checking for {:?}", self.table);
+            // println!("checking for {:?}", self.table);
             if tbl == self.table {
                 println!("found {tbl:?}");
                 return true

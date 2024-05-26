@@ -1,50 +1,33 @@
-#![allow(unused_imports)]
-#![allow(dead_code)]
-mod traits;
+use tokio::sync::watch;
+use std::io;
+
 mod config;
 mod producer;
 mod dynamosdk;
-mod menu;
+mod traits;
 mod util;
 mod iam;
+mod menu;
 
-use aws_config::imds::Client;
-use producer::start_log_stream;
-use config::read_config;
-use std::{env, process};
-use menu::{start_collection_service, read_input, stop_collection_service, view_collection_service_status, manage_collection_configurations, backup_collection_data, admin_cli};
-use std::process::Command;
-use std::fs::{File, OpenOptions};
-use std::io::{self, Write};
-use chrono::{Utc, Datelike, Timelike};
+use menu::{display_menu, handle_menu_choice, read_input};
 
 #[tokio::main]
 async fn main() {
+    // Initialize the logger
+    println!("Starting the application");
+
+    // Create a channel for shutdown signal
+    let (shutdown_tx, shutdown_rx) = watch::channel(());
 
     loop {
-        println!("Menu:");
-        println!("1. Start Log Collection service");
-        println!("2. Stop Log Collection service");
-        println!("3. View Log Collection service status");
-        println!("4. Manage Log Collection configurations");
-        println!("5. Backup Log Collection data");
-        println!("6. Access AWS Administrator CLI");
-        println!("7. Exit");
-
+        display_menu();
         let choice = read_input("Enter your choice: ");
-        match choice.trim() {
-            "1" => start_collection_service().await,
-            "2" => stop_collection_service(),
-            "3" => view_collection_service_status(),
-            "4" => manage_collection_configurations(),
-            "5" => backup_collection_data(),
-            "6" => admin_cli().await,
-            "7" => {
-                println!("Exiting...");
-                break;
-            }
-            _ => println!("Invalid choice"),
+        // Clone the receiver each time to pass a new instance
+        let shutdown_rx = shutdown_rx.clone();
+        handle_menu_choice(choice.trim(), &shutdown_tx, shutdown_rx).await;
+
+        if choice.trim() == "7" {
+            break;
         }
     }
 }
-
