@@ -1,10 +1,12 @@
 
 use crate::producer;
 use crate::config::read_config;
+use std::fmt::Error;
 use std::io::{self, Write};
 use std::fs::OpenOptions;
 use std::fs;
 use chrono::{Utc, Datelike, Timelike};
+use crate::iam;
 
 pub fn read_input(prompt: &str) -> String {
     print!("{}", prompt);
@@ -36,7 +38,7 @@ pub async fn start_collection_service() {
         Some(config) => {
             println!("{config:?}");
 
-            if let Err(e) = producer::start_log_stream(config.dynamodb).await {
+        if let Err(e) = producer::start_log_stream(config.dynamodb).await {
                 let str_error = format!("Log stream error: {}", e);
                 write_to_file(&str_error, 
                     "collection.log").expect("Failed to write to file");
@@ -73,7 +75,11 @@ pub fn backup_collection_data() {
     write_to_file("Backing up Log Collection data...", "collection.log").expect("Failed to write to file");
 }
 
-pub fn restore_collection_data() {
-    println!("Restoring Log Collection data...");
-    write_to_file("Restoring Log Collection data...", "collection.log").expect("Failed to write to file");
+pub async fn admin_cli() {
+    println!("Running AWS Administrator CLI...");
+    if let Err(e) = iam::run_admin_cli().await {
+        let str_error = format!("AWS Administrator CLI error: {}", e);
+        write_to_file(&str_error, "collection.log").expect("Failed to write to file");
+    }
+    write_to_file("Running AWS Administrator CLI...", "collection.log").expect("Failed to write to file");
 }

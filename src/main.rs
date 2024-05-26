@@ -12,8 +12,7 @@ use aws_config::imds::Client;
 use producer::start_log_stream;
 use config::read_config;
 use std::{env, process};
-use menu::{start_collection_service, read_input, stop_collection_service, view_collection_service_status, manage_collection_configurations, backup_collection_data, restore_collection_data};
-
+use menu::{start_collection_service, read_input, stop_collection_service, view_collection_service_status, manage_collection_configurations, backup_collection_data, admin_cli};
 use std::process::Command;
 use std::fs::{File, OpenOptions};
 use std::io::{self, Write};
@@ -29,7 +28,7 @@ async fn main() {
         println!("3. View Log Collection service status");
         println!("4. Manage Log Collection configurations");
         println!("5. Backup Log Collection data");
-        println!("6. Restore Log Collection data");
+        println!("6. Access AWS Administrator CLI");
         println!("7. Exit");
 
         let choice = read_input("Enter your choice: ");
@@ -39,7 +38,7 @@ async fn main() {
             "3" => view_collection_service_status(),
             "4" => manage_collection_configurations(),
             "5" => backup_collection_data(),
-            "6" => restore_collection_data(),
+            "6" => admin_cli().await,
             "7" => {
                 println!("Exiting...");
                 break;
