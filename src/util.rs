@@ -2,7 +2,7 @@ use aws_sdk_dynamodb::client;
 
 // util.rs serves as housing various utility functions that are used in main.rs
 use crate::config::Config;
-use crate::producer::start_log_stream;
+use crate::producer::start_log_service;
 use crate::dynamosdk; // Import other modules as needed
 use std::process;
 use std::fmt;

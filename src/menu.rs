@@ -1,19 +1,25 @@
-use crate::producer;
-use crate::config::read_config;
-use std::io::{self, Write};
-use std::fs::OpenOptions;
-use chrono::{Utc, Datelike, Timelike};
+use crate::config::{manage_collection_configurations, Config};
+use crate::producer::{start_log_service, stop_log_service, list_available_logs, view_running_logs};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use tokio::sync::watch;
+use std::path::Path;
+use chrono::{Utc, Datelike, Timelike};
 use crate::iam;
+use std::fs::OpenOptions;
+use std::io::{self, Write};
+
+const CONFIG_PATH: &str = "config.toml";
 
 pub fn read_input(prompt: &str) -> String {
+    use std::io::{self, Write};
     print!("{}", prompt);
     io::stdout().flush().expect("Failed to flush stdout");
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
         .expect("Failed to read user input");
-    input
+    input.trim().to_string()
 }
 
 fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
@@ -29,52 +35,82 @@ pub fn display_menu() {
     println!("Menu:");
     println!("1. Start Log Collection service");
     println!("2. Stop Log Collection service");
-    println!("3. View Log Collection service status");
+    println!("3. View Running Log Collection services");
     println!("4. Manage Log Collection configurations");
-    println!("5. Backup Log Collection data");
+    println!("5. AWS Administrator CLI");
     println!("6. Restore Log Collection data");
     println!("7. Exit");
 }
 
-pub async fn start_collection_service(mut shutdown_rx: watch::Receiver<()>) {
-    let config_data = read_config();
-    match config_data {
-        Some(config) => {
-            println!("{:?}", config);
-
-            if let Err(e) = producer::start_log_stream(config.dynamodb, shutdown_rx).await {
-                let str_error = format!("Log stream error: {}", e);
-                write_to_file(&str_error, "collection.log").expect("Failed to write to file");
-            }
-            write_to_file("Starting Log Collection service...", "collection.log").expect("Failed to write to file");
-            println!("Starting Log Collection service...");
-        }
-        None => panic!("Error reading configuration."),
-    }
-}
-
-pub fn stop_collection_service(shutdown_tx: &watch::Sender<()>) {
-    println!("Stopping Log Collection service...");
-    shutdown_tx.send(()).unwrap();
-    write_to_file("Stopping Log Collection service...", "collection.log").expect("Failed to write to file");
-}
-
-pub async fn handle_menu_choice(choice: &str, shutdown_tx: &watch::Sender<()>, shutdown_rx: watch::Receiver<()>) {
+pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<String, watch::Sender<()>>>>) {
     match choice {
         "1" => {
-            let shutdown_rx = shutdown_rx.clone();
-            tokio::spawn(async move {
-                start_collection_service(shutdown_rx).await;
-            });
+
+            // Look for the avilable logs and iterate them if there exists any
+            // clone the log_sercies to pass it to the start_log_service
+            // use tokio::spawn to start the log service
+            // use tokio::join to wait for the log service to start
+            let available_logs = list_available_logs();
+            if available_logs.is_empty() {
+                println!("No available logs to start.");
+                return;
+            }
+            
+            println!("Available log services to start:");
+            for (index, log) in available_logs.iter().enumerate() {
+                println!("{}. {}", index + 1, log);
+            }
+
+            let log_choice = read_input("Enter the number of the log service to start: ");
+            if let Ok(index) = log_choice.parse::<usize>() {
+                if index > 0 && index <= available_logs.len() {
+                    let service_name = available_logs[index - 1].clone();
+                    let log_services = log_services.clone();
+                    tokio::spawn(async move {
+                        start_log_service(service_name, log_services).await;
+                    });
+                } else {
+                    println!("Invalid choice.");
+                }
+            } else {
+                println!("Invalid input.");
+            }
         }
+        // Lock the log_services and stop the log service
+        // Clone the log_services to pass it to the stop_log_service
+        // Grab the name of the log service based on the index
+        // Use tokio::spawn to stop the log service
         "2" => {
-            println!("Stopping Log Collection service...");
-            stop_collection_service(shutdown_tx); // Send shutdown signal
-            write_to_file("Stopping Log Collection service...", "collection.log").expect("Failed to write to file");
+            let services = log_services.lock().unwrap();
+            if services.is_empty() {
+                println!("No running log services to stop.");
+                return;
+            }
+
+            println!("Available running log services to stop:");
+            let service_names: Vec<_> = services.keys().cloned().collect();
+            for (index, service_name) in service_names.iter().enumerate() {
+                println!("{}. {}", index + 1, service_name);
+            }
+
+            drop(services); // Release the lock before awaiting
+
+            let log_choice = read_input("Enter the number of the log service to stop: ");
+            if let Ok(index) = log_choice.parse::<usize>() {
+                if index > 0 && index <= service_names.len() {
+                    let service_name = service_names[index - 1].clone();
+                    let log_services = log_services.clone();
+                    stop_log_service(service_name, log_services).await;
+                } else {
+                    println!("Invalid choice.");
+                }
+            } else {
+                println!("Invalid input.");
+            }
         }
-        "3" => view_collection_service_status(),
+        "3" => view_running_logs(log_services),
         "4" => manage_collection_configurations(),
-        "5" => backup_collection_data(),
+        "5" => admin_cli().await,
         "6" => restore_collection_data(),
         "7" => {
             println!("Exiting...");
@@ -84,26 +120,6 @@ pub async fn handle_menu_choice(choice: &str, shutdown_tx: &watch::Sender<()>, s
     }
 }
 
-fn view_collection_service_status() {
-    println!("Viewing Log Collection service status...");
-    write_to_file("Viewing Log Collection service status...", "collection.log").expect("Failed to write to file");
-}
-
-fn manage_collection_configurations() {
-    println!("Managing Log Collection configurations...");
-    write_to_file("Managing Log Collection configurations...", "collection.log").expect("Failed to write to file");
-}
-
-fn backup_collection_data() {
-    println!("Backing up Log Collection data...");
-    write_to_file("Backing up Log Collection data...", "collection.log").expect("Failed to write to file");
-}
-
-fn restore_collection_data() {
-    println!("Restoring Log Collection data...");
-    write_to_file("Restoring Log Collection data...", "collection.log").expect("Failed to write to file");
-}
-
 pub async fn admin_cli() {
     println!("Running AWS Administrator CLI...");
     if let Err(e) = iam::run_admin_cli().await {
@@ -111,4 +127,9 @@ pub async fn admin_cli() {
         write_to_file(&str_error, "collection.log").expect("Failed to write to file");
     }
     write_to_file("Running AWS Administrator CLI...", "collection.log").expect("Failed to write to file");
+}
+
+fn restore_collection_data() {
+    println!("Restoring Log Collection data...");
+    // Implement restore logic here
 }
