@@ -24,6 +24,10 @@ pub struct DynamodbClientWrapper {
     pub table: String,
 }
 
+// DynamodbClientWrapper implements the DataHandler trait
+// to send data to dynamodb table specified in the config
+// Check if the table exists. If not, create it.
+// Send the data to the table
 #[async_trait]
 impl DataHandler for DynamodbClientWrapper {
     async fn handle_log_data(&self, log_channel: Receiver<(String,String)>) {

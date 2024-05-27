@@ -22,6 +22,7 @@ use chrono::{Utc, Datelike, Timelike};
 #[tokio::main]
 async fn main() {
 
+    // Start the menu loop and wait for user input
     loop {
         println!("Menu:");
         println!("1. Start Log Collection service");

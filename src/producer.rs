@@ -15,6 +15,7 @@ use aws_sdk_dynamodb::Client as DynamodbClient;
 use aws_sdk_dynamodb::types::AttributeValue;
 
 
+// Tail the log file and send the data to the table
 fn 
 tail_and_send_log(path: &str, 
                   sender: Sender<(String,String)>) -> Result<()> {
@@ -38,6 +39,11 @@ tail_and_send_log(path: &str,
     Ok(())
 }
 
+// Start the log stream
+// and send the data to the table specified in the config
+// Sender and Receiver are used to send and receive data.
+// Threads are used to tail the log file and send the data.
+// The table is created if it doesn't exist.
 pub async fn 
 start_log_stream(config: DynamoDBConfig) -> Result<()> {
     println!("{config:?}");

@@ -6,6 +6,8 @@ use std::fs::OpenOptions;
 use std::fs;
 use chrono::{Utc, Datelike, Timelike};
 
+// Read user input from the standard input
+// and flush the output stream.
 pub fn read_input(prompt: &str) -> String {
     print!("{}", prompt);
     io::stdout().flush().expect("Failed to flush stdout");
@@ -16,6 +18,9 @@ pub fn read_input(prompt: &str) -> String {
     input
 }
 
+// Write a message to a file.
+// The message is prefixed with the current time.
+// The file is opened in append mode.
 fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
     let current_time = Utc::now();
     let formatted_time = current_time.format("%Y-%m-%d %H:%M:%S").to_string();
