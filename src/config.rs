@@ -88,6 +88,7 @@ pub fn manage_collection_configurations() {
             let source = read_input("Enter log source: ");
             let table = read_input("Enter DynamoDB table name: ");
             let mut config = read_config().expect("Failed to read config");
+            
             add_log_config(&mut config, source, table);
             write_config(CONFIG_PATH, &config).expect("Failed to write config");
             println!("Log configuration added.");
