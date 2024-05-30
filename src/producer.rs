@@ -5,7 +5,7 @@ use std::thread;
 use tokio::sync::watch;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use crate::config::{DynamoDBConfig, read_config};
+use crate::config::read_config;
 use crate::dynamosdk;
 use crate::traits::DataHandler;
 

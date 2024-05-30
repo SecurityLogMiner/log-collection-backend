@@ -1,10 +1,8 @@
-use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_dynamodb::{Client as DynamodbClient, Error};
 use aws_sdk_dynamodb::operation::create_table::CreateTableOutput;
 use aws_sdk_dynamodb::types::{AttributeDefinition, KeySchemaElement, KeyType, ProvisionedThroughput, ScalarAttributeType, AttributeValue};
 use async_trait::async_trait;
 use std::sync::mpsc::Receiver;
-use crate::dynamosdk;
 use crate::traits::DataHandler;
 
 #[derive(Debug, Clone)]

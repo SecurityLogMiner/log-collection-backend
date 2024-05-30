@@ -1,14 +1,10 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use tokio::sync::watch;
-use std::io;
 
 mod config;
 mod producer;
 mod dynamosdk;
 mod traits;
-mod util;
-mod iam;
 mod menu;
 
 use menu::{display_menu, handle_menu_choice, read_input};
@@ -34,7 +30,7 @@ async fn main() {
         let log_services = log_services.clone();
         handle_menu_choice(choice.trim(), log_services).await;
 
-        if choice.trim() == "7" {
+        if choice.trim() == "5" {
             break;
         }
     }

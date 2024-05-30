@@ -1,10 +1,11 @@
 use serde_derive::{Deserialize, Serialize};
 use std::fs;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::Path;
 use toml;
 
+const CONFIG_PATH: &str = "config.toml";
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Package {
     pub source: String,
@@ -23,7 +24,7 @@ pub struct Config {
 
 // Read the config toml file
 pub fn read_config() -> Option<Config> {
-    let mut file = File::open("config.toml").unwrap();
+    let mut file = File::open(CONFIG_PATH).unwrap();
     let mut data = String::new();
     file.read_to_string(&mut data).unwrap();
     let config: Config = toml::from_str(&data).unwrap();
