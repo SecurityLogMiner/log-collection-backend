@@ -5,7 +5,7 @@ use std::io::Read;
 use std::path::Path;
 use toml;
 
-const CONFIG_PATH: &str = "config.toml";
+const CONFIG_PATH: &str = "default.toml";
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Package {
     pub source: String,

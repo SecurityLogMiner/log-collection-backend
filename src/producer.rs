@@ -17,6 +17,7 @@ fn tail_and_send_log(path: &str, sender: Sender<(String, String)>, shutdown_rx: 
     let mut tail_process = Command::new("tail")
         .args(["-f", "-n0", "-q", path])
         .stdout(Stdio::piped())
+        .stderr(Stdio::null()) 
         .spawn()?;
 
     let stdout = tail_process.stdout.take().expect("Failed to open stdout");

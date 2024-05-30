@@ -105,6 +105,7 @@ pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<St
         "4" => manage_collection_configurations(),
         "5" => {
             println!("Exiting...");
+            std::process::exit(0);
         }
         _ => println!("Invalid choice"),
     }
