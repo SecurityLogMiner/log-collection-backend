@@ -22,11 +22,11 @@ impl DataHandler for DynamodbClientWrapper {
                 for log_tuple in log_channel {
                     let (_time, data) = log_tuple;
                     // println!("{:?}, {:?}, {:?}", time, data, table_name);
-                    let _res = client.put_item()
+                    let res = client.put_item()
                         .table_name(&table_name)
                         .item("eptestkey", AttributeValue::S(data))
                         .send().await;
-                    // println!("{:?}", res);
+                    println!("{:?}", res);
                 }
             });
         } else {

@@ -82,12 +82,7 @@ pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<St
 
             println!("Available running log services to stop:");
             let service_names: Vec<_> = services.keys().cloned().collect();
-            for (index, service_name) in service_names.iter().enumerate() {
-                println!("{}. {}", index + 1, service_name);
-            }
-
             drop(services); // Release the lock before awaiting
-
             let log_choice = read_input("Enter the number of the log service to stop: ");
             if let Ok(index) = log_choice.parse::<usize>() {
                 if index > 0 && index <= service_names.len() {
