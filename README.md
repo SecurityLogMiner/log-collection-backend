@@ -17,6 +17,9 @@ The Log Collection client requires:
 - Amazon Web Services (AWS) CLI
 - Rust
 - Terraform
+- Curl
+- unzip
+- wget
 
 Ensure that Rust and AWS CLI is installed and configured on your machine. You can run the install bash script to 
 configure and install dependencies.
