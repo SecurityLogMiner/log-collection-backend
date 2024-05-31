@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-west-2"
-}
-
 # Generate a random 4-digit number
 resource "random_id" "user_id" {
   byte_length = 2
