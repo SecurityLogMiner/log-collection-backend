@@ -11,6 +11,13 @@ resource "random_id" "user_id" {
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+  shared_credentials_files = ["~/.aws/credentials"]
+  shared_config_files      = ["~/.aws/config"]
+  profile                  = "default"
+}
+
 # Create IAM user with random 4-digit ID
 resource "aws_iam_user" "log_user" {
   name = "user${random_id.user_id.hex}"
