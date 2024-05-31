@@ -53,7 +53,6 @@ pub fn list_available_logs() -> Vec<String> {
 // spawn a new thread to send the data to the channel
 // Create a shutdown channel and use tokio::sync::watch to receive the shutdown signal
 // Insert the service name and the shutdown channel into the log services
-
 pub async fn start_log_service(service_name: String, log_services: Arc<Mutex<HashMap<String, watch::Sender<()>>>>) {
     let config_data = read_config();
     match config_data {
