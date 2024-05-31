@@ -23,6 +23,7 @@ async fn main() {
     // watch is used to send a signal to the consumer when the log service is started or stopped
     let log_services = Arc::new(Mutex::new(HashMap::new()));
 
+    // Start the menu loop and wait for user input
     loop {
         display_menu();
         let choice = read_input("Enter your choice: ");
