@@ -1,84 +1,108 @@
+use crate::config::manage_collection_configurations;
+use crate::producer::{start_log_service, stop_log_service, list_available_logs, view_running_logs};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use tokio::sync::watch;
 
-use crate::producer;
-use crate::config::read_config;
-use std::io::{self, Write};
-use std::fs::OpenOptions;
-use std::fs;
-use chrono::{Utc, Datelike, Timelike};
 
-// Read user input from the standard input
-// and flush the output stream.
+
 pub fn read_input(prompt: &str) -> String {
+    use std::io::{self, Write};
     print!("{}", prompt);
     io::stdout().flush().expect("Failed to flush stdout");
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
         .expect("Failed to read user input");
-    input
+    input.trim().to_string()
 }
 
-// Write a message to a file.
-// The message is prefixed with the current time.
-// The file is opened in append mode.
-fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
-    let current_time = Utc::now();
-    let formatted_time = current_time.format("%Y-%m-%d %H:%M:%S").to_string();
-    let message_with_time = format!("[{}] {}", formatted_time, message);
-    let mut file = OpenOptions::new().create(true).append(true).open(file_path)?;
-    writeln!(file, "{}", message_with_time)?;
-    Ok(())
+// fn write_to_file(message: &str, file_path: &str) -> io::Result<()> {
+//     let current_time = Utc::now();
+//     let formatted_time = current_time.format("%Y-%m-%d %H:%M:%S").to_string();
+//     let message_with_time = format!("[{}] {}", formatted_time, message);
+//     let mut file = OpenOptions::new().create(true).append(true).open(file_path)?;
+//     writeln!(file, "{}", message_with_time)?;
+//     Ok(())
+// }
+
+pub fn display_menu() {
+    println!("Menu:");
+    println!("1. Start Log Collection service");
+    println!("2. Stop Log Collection service");
+    println!("3. View Running Log Collection services");
+    println!("4. Manage Log Collection configurations");
+    println!("5. Exit");
 }
 
-// Start a process in the background that handles all threads. 
-// The threads represent incoming log data from the log file.
-// Each thread has a transmitter and receiver, aka a channel that needs
-// to run asynchronously, in the background.
-pub async fn start_collection_service() {
-    
-    let config_data = read_config();
-    match config_data {
-        Some(config) => {
-            println!("{config:?}");
+pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<String, watch::Sender<()>>>>) {
+    match choice {
+        "1" => {
 
-            if let Err(e) = producer::start_log_stream(config.dynamodb).await {
-                let str_error = format!("Log stream error: {}", e);
-                write_to_file(&str_error, 
-                    "collection.log").expect("Failed to write to file");
+            // Look for the avilable logs and iterate them if there exists any
+            // clone the log_sercies to pass it to the start_log_service
+            // use tokio::spawn to start the log service
+            // use tokio::join to wait for the log service to start
+            let available_logs = list_available_logs();
+            if available_logs.is_empty() {
+                println!("No available logs to start.");
+                return;
             }
-            write_to_file("Starting Log Collection service...", 
-                          "collection.log").expect("Failed to write to file");
-            println!("Starting Log Collection service...");
+            
+            println!("Available log services to start:");
+            for (index, log) in available_logs.iter().enumerate() {
+                println!("{}. {}", index + 1, log);
+            }
 
+            let log_choice = read_input("Enter the number of the log service to start: ");
+            if let Ok(index) = log_choice.parse::<usize>() {
+                if index > 0 && index <= available_logs.len() {
+                    let service_name = available_logs[index - 1].clone();
+                    let log_services = log_services.clone();
+                    tokio::spawn(async move {
+                        start_log_service(service_name, log_services).await;
+                    });
+                } else {
+                    println!("Invalid choice.");
+                }
+            } else {
+                println!("Invalid input.");
+            }
         }
-        None => panic!("Error reading configuration."),
+        // Lock the log_services and stop the log service
+        // Clone the log_services to pass it to the stop_log_service
+        // Grab the name of the log service based on the index
+        // Use tokio::spawn to stop the log service
+        "2" => {
+            let services = log_services.lock().unwrap();
+            if services.is_empty() {
+                println!("No running log services to stop.");
+                return;
+            }
+
+            println!("Available running log services to stop:");
+            let service_names: Vec<_> = services.keys().cloned().collect();
+            drop(services); // Release the lock before awaiting
+            let log_choice = read_input("Enter the number of the log service to stop: ");
+            if let Ok(index) = log_choice.parse::<usize>() {
+                if index > 0 && index <= service_names.len() {
+                    let service_name = service_names[index - 1].clone();
+                    let log_services = log_services.clone();
+                    stop_log_service(service_name, log_services).await;
+                } else {
+                    println!("Invalid choice.");
+                }
+            } else {
+                println!("Invalid input.");
+            }
+        }
+        "3" => view_running_logs(log_services),
+        "4" => manage_collection_configurations(),
+        "5" => {
+            println!("Exiting...");
+            std::process::exit(0);
+        }
+        _ => println!("Invalid choice"),
     }
-    write_to_file("Starting Log Collection service...", 
-                  "collection.log").expect("Failed to write to file");
-    println!("Starting Log Collection service...");
 }
 
-pub fn stop_collection_service() {
-    println!("Stopping Log Collection service...");
-    write_to_file("Stopping Log Collection service...", "collection.log").expect("Failed to write to file");
-}
-
-pub fn view_collection_service_status() {
-    println!("Viewing Log Collection service status...");
-    write_to_file("Viewing Log Collection service status...", "collection.log").expect("Failed to write to file");
-}
-
-pub fn manage_collection_configurations() {
-    println!("Managing Log Collection configurations...");
-    write_to_file("Managing Log Collection configurations...", "collection.log").expect("Failed to write to file");
-}
-
-pub fn backup_collection_data() {
-    println!("Backing up Log Collection data...");
-    write_to_file("Backing up Log Collection data...", "collection.log").expect("Failed to write to file");
-}
-
-pub fn restore_collection_data() {
-    println!("Restoring Log Collection data...");
-    write_to_file("Restoring Log Collection data...", "collection.log").expect("Failed to write to file");
-}

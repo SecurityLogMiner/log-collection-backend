@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "us-west-2"
-}
-
 # Generate a random 4-digit number
 resource "random_id" "user_id" {
   byte_length = 2
@@ -9,6 +5,13 @@ resource "random_id" "user_id" {
     # Ensure a new ID is generated when any input variable changes
     always_run = "${timestamp()}"
   }
+}
+
+provider "aws" {
+  region = "us-west-2"
+  shared_credentials_files = ["~/.aws/credentials"]
+  shared_config_files      = ["~/.aws/config"]
+  profile                  = "default"
 }
 
 # Create IAM user with random 4-digit ID

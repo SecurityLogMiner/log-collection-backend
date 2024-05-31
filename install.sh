@@ -93,8 +93,5 @@ else
     # Download and run the Rust installation script
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
-    # Source the cargo environment script
-    echo "Adding Rust to the shell environment..."
-    source $HOME/.cargo/env
 
 fi
