@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 aws-config = { version= "1.1.4", features = ["behavior-version-latest"] }
 tokio = { version = "1", features = ["full"] }
-aws-sdk-firehose = "1.13.0"
 ctrlc = "3.4.2"
 aws-sdk-dynamodb = "1.13.0"
 aws-sdk-iam = "1.12.0"
@@ -15,6 +14,13 @@ async-trait = "0.1.77"
 toml = "0.8.10"
 serde = "1.0.196"
 serde_derive = "1.0.196"
+ratatui = "0.26.1"
+crossterm = "0.27.0"
+itertools = "0.12.1"
+unicode-width = "0.1.11"
+chrono = "0.4.37"
+notify = { version = "6.1.1", default-features = false, features = ["macos_kqueue"] }
+futures-util = "0.3.30"
 
 [dependencies.uuid]
 version = "1.7.0"

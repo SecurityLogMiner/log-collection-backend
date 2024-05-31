@@ -1,17 +1,35 @@
-<a name="readme-top"></a>
+<a href="top"></a>
+# Table of Contents
+1. [Overview](#overview)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [Contributing](#contributing)
+5. [License](#license)
+6. [Feedback](#feedback)
 
-# Log Collection Client 
+## Overview
+System Management Software provides the insight needed to secure, troubleshoot, and optimize systems and applications. Whether it is an individual user or larger organization, log collection is the first step in the analysis process. The collection and storage of system and application logs is designed with ease-of-use in mind to provide simple and efficient event visibiilty for any device. 
 
-A service that collects and sends system event data to a server.
+## Installation
 
-  <p align="left">
-    A service that collects and sends system event data to a server.
-    <br />
-    <a href="https://securitylogminer-doc-repo.readthedocs.io/"><strong>Documentation »</strong></a>
-    <br />
-  
-## Table of Contents
+### Prerequisutes
+The Log Collection client requires:
+- Amazon Web Services (AWS) CLI
+- Rust
+- Terraform
+- Curl
+- unzip
+- wget
 
+
+Ensure that Rust and AWS CLI is installed and configured on your machine. You can run the install bash script to 
+configure and install dependencies.
+```
+./install.sh
+```
+
+## Usage
+=======
 - [Getting Started](#getting-started)
 - [Resources](#resources)
 - [License](#license)
@@ -137,8 +155,11 @@ else
 fi
 ```
 
-Ensure that your IAM credentials are provided in ~/.aws/credentials:
+
+### Running the Log Collection System
+1. Start the log collector through Rust
 ```
+cargo build
 [default] 
   aws_access_key_id=YOUR-ACCESS-KEY
   aws_secret_access_key=YOUR-SECRET-KEY
@@ -195,25 +216,18 @@ cd <client_repo_dir>
 cargo install
 cargo run
 ```
+2. Menu Options:
+    Send Logs: Enter the path to the logs directory to start sending logs to DynamoDB.
+    Stop Logs: Stop the log collection process gracefully.
+    View Logs: View the logs that are currently being collected.
+    Exit: Exit the menu.
 
-## Resources
-- [SDK for Rust](https://docs.aws.amazon.com/sdk-for-rust/latest/dg/using.html)
-- [Amazon Simple Storage Service](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html)
-- [AWS SDK and S3 Rust Documentation](https://docs.rs/aws-sdk-s3/latest/aws_sdk_s3/index.html)
-- [Rust AWS SDK Examples](https://github.com/awslabs/aws-sdk-rust/tree/main/examples/examples/s3)
-- [Amazon Dynamodb Docs](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.html)
-- [Amazon Dynamodb Examples](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/rustv1/examples/dynamodb#code-examples)
-
-### IAM Resources
-- [IAM Crate](https://docs.rs/aws-iam/latest/aws_iam/)
-- [IAM SDK Code Examples](https://docs.aws.amazon.com/IAM/latest/UserGuide/service_code_examples_iam.html)
-- [AWS-SDK-IAM Client docs](https://docs.rs/aws-sdk-iam/latest/aws_sdk_iam/client/struct.Client.html)
-- [Creating Read only and read-write users IAM AWS SDK](https://docs.aws.amazon.com/IAM/latest/UserGuide/iam_example_iam_Scenario_UserPolicies_section.html)
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## Contributing
+We welcome contributions! Please submit a [new issue](https://github.com/SecurityLogMiner/log-collection-client/issues/new) to improve the log collection client!
 
 ## License
 Apache 2.0
 
-## Acknowledgments
+## Feedback
+We would love to hear your thoughts and suggestions. Please open an issue on Github or contact us at [logcollectionsystem@gmail.com](logcollectionsystem@gmail.com)
 
-## Contact

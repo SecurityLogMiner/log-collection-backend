@@ -1,61 +1,38 @@
-mod traits;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+
 mod config;
 mod producer;
 mod dynamosdk;
-mod util;
-mod iam;
+mod traits;
+mod menu;
 
-use aws_config::imds::Client;
-use producer::start_log_stream;
-use config::read_config;
-use std::{env, process};
-use util::{print_help};
+use menu::{display_menu, handle_menu_choice, read_input};
 
 #[tokio::main]
-async fn main() -> Result<(), std::io::Error> {
-    let args: Vec<String> = env::args().collect();
+async fn main() {
+    // Initialize the logger
+    // env_logger::init();
+    println!("Starting the application");
 
-    if args.len() <= 2 {
-        let config_data = read_config();
+    // Create a shared state to manage log services
+    // https://doc.rust-lang.org/std/collections/struct.HashMap.html
+    // https://itsallaboutthebit.com/arc-mutex/
+    // Using the hashmap to manage the log services
+    // Mutex is used to protect the hashmap from concurrent access
+    // watch is used to send a signal to the consumer when the log service is started or stopped
+    let log_services = Arc::new(Mutex::new(HashMap::new()));
 
-        match config_data {
-            Some(config) => {
-                if args.len() == 1 {
+    // Start the menu loop and wait for user input
+    loop {
+        display_menu();
+        let choice = read_input("Enter your choice: ");
+        // Clone the Arc pointer to pass it to the async task then prompt for the user choice
+        let log_services = log_services.clone();
+        handle_menu_choice(choice.trim(), log_services).await;
 
-                //Create a setup functoin 
-                // User gives IAM credentials; as long as they have correct policies; based on the policies set up on whatever they have available.
-                // Attach policies to IAM user based on the set up function
-                    todo!();
-            }
-                if args.len() == 2 {
-                    if args[1] == "--help" || args[1] == "-h" {
-                        util::print_help().await;
-                    }
-
-                    let destination = args[1].as_str();
-                    println!("Destination: {}", destination);
-                    match destination {
-                        "dynamodb" => {
-                            //dynamosdk::send_dynamodb(config).await;
-                            let _ = start_log_stream(config.dynamodb).await;
-                        }
-                        "iam" => {
-                            util::initialize_iam(config).await;
-                        }
-                        "run-admin" => {
-                            // util::initialize_iam(config).await;
-                            util::run_admin_cli().await;
-                        }
-                        _ => {
-                            util::print_help().await;
-                        }
-                    }
-                }
-            }
-            None => panic!("Error reading configuration. Fix it."),
+        if choice.trim() == "5" {
+            break;
         }
-    } 
-
-    Ok(())
+    }
 }
-

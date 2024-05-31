@@ -1,2 +1,1 @@
-endepoint should be able to merge.
-all others should trigger a merge approval.
+jicxer,murchej should be able to merge.
