@@ -220,12 +220,11 @@ Note: Be sure to activate the Rust environment by configuring the PATH environme
 [Configuring the PATH environment variable](https://www.rust-lang.org/tools/install)
 
 3. Menu Options:
-  1. Start Log Collection
-  2. Stop Log Collection
-  3. View running logs
-  4. Manage Log Collection configuration
-  5. Exit
-
+  - Start Log Collection
+  - Stop Log Collection
+  - View running logs
+  - Manage Log Collection configuration
+  - Exit
 
 ## Contributing
 We welcome contributions! Please submit a [new issue](https://github.com/SecurityLogMiner/log-collection-client/issues/new) to improve the log collection client!
