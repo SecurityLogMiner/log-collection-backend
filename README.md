@@ -15,6 +15,7 @@ System Management Software provides the insight needed to secure, troubleshoot, 
 ### Prerequisutes
 The Log Collection client requires:
 - Amazon Web Services (AWS) CLI
+- Amazon Web Services Account
 - Rust
 - Terraform
 - Curl
@@ -22,22 +23,9 @@ The Log Collection client requires:
 - wget
 
 
-Ensure that Rust and AWS CLI is installed and configured on your machine. You can run the install bash script to 
-configure and install dependencies.
-```
-./install.sh
-```
+
 
 ## Usage
-=======
-- [Getting Started](#getting-started)
-- [Resources](#resources)
-- [License](#license)
-- [Acknowledgments](#acknowledgments)
-- [Contact](#contact)
-
-### Creating Issues
-TODO
 
 ## Getting Started
 Create an AWS account, setup IAM and bucket policies.
@@ -46,13 +34,19 @@ Create an AWS account, setup IAM and bucket policies.
 2. Set up Identity and Access Management account (IAM).
     - Note: Be sure to copy down your access and secret access key and save them locally.
 
-Clone the client repositories to start.
-- [Client](https://github.com/SecurityLogMiner/log-collection-client)
 
-The client will read the configuration file and begin processing and sending 
-log data from the given PATH to the server.
+Clone the [client](https://github.com/SecurityLogMiner/log-collection-client) repositories to start.
+``` 
+git clone https://github.com/SecurityLogMiner/log-collection-client.git
+```
 
 3. Run the install script to create logs and the directory to store them in, as well as installing terraform, AWSCLI, and Rust.
+
+Ensure that Rust and AWS CLI is installed and configured on your machine. You can run the install bash script to 
+configure and install dependencies.
+```
+./install.sh
+```
 
 install.sh:
 ```
@@ -71,11 +65,6 @@ if [ ! -d "$LOG_DIR" ]; then
 else
     echo "Log directory already exists at: $LOG_DIR"
 fi
-
-# TODO - add the setup to add user permissions to interact with the log directory
-# Replace 'username' with the actual username that needs permissions
-# setfacl -m u:username:rwx "$LOG_DIR"
-
 
 # Function to generate a random security log entry
 generate_log_entry() {
@@ -150,23 +139,19 @@ else
     sudo apt install -y curl build-essential
     # Download and run the Rust installation script
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-
 fi
 ```
+Once AWS CLI is installed: enter the command "aws config" to configure these credentials as well as the output type(text) and region "us-west-2".
+Paste your AWS aws_secret_key_id and aws_secret_access_key when prompted.
 
-
-### Running the Log Collection System
-1. Start the log collector through Rust
+These credentials can also be managed in the file ~/.aws/credentials
+The configuration can be managed in the file ~/.aws/config
 ```
-cargo build
 [default] 
   aws_access_key_id=YOUR-ACCESS-KEY
   aws_secret_access_key=YOUR-SECRET-KEY
 ```
-Enter the command "aws config" to configure these credentials as well as the output type(text) and region "us-west-2".
-
-The client will look for these credentials when executed.
+The client will look for these credentials and configurations to properly access AWS resouces.
 
 4. Use command "terraform init" and then "terraform apply" to create user profile under the users IAM group. This gives the proper user permissions and gives Cloud Watch resource access.
 
@@ -210,17 +195,37 @@ resource "aws_cloudwatch_log_stream" "security_log_stream" {
 }
 ```
 
+
+### Running the Log Collection System
+1. Configure toml file
+The client will have a default toml file that seeks configurations.
+Specify what log files the client will look for and what AWS DynamoDB table you'd like to store them in.
+The formatting for the toml file is as follows:
+```
+[[dynamodb.package]]
+source = "<Source-file>"
+table = "<Table-name>"
+```
+Where source file is logs that the client will ingest and table is the AWS DynamoDB table name.
+Additionally, these configurations can also be added, removed, or updated through the client menu "Manage Log Collection configuration" option.
+
+2. Start the log collector through Rust
 Running the Client:
 ```
-cd <client_repo_dir>
+cd log-collection-client
 cargo install
 cargo run
 ```
-2. Menu Options:
-    Send Logs: Enter the path to the logs directory to start sending logs to DynamoDB.
-    Stop Logs: Stop the log collection process gracefully.
-    View Logs: View the logs that are currently being collected.
-    Exit: Exit the menu.
+Note: Be sure to activate the Rust environment by configuring the PATH environment variable
+[Configuring the PATH environment variable](https://www.rust-lang.org/tools/install)
+
+3. Menu Options:
+  1. Start Log Collection
+  2. Stop Log Collection
+  3. View running logs
+  4. Manage Log Collection configuration
+  5. Exit
+
 
 ## Contributing
 We welcome contributions! Please submit a [new issue](https://github.com/SecurityLogMiner/log-collection-client/issues/new) to improve the log collection client!
@@ -230,4 +235,3 @@ Apache 2.0
 
 ## Feedback
 We would love to hear your thoughts and suggestions. Please open an issue on Github or contact us at [logcollectionsystem@gmail.com](logcollectionsystem@gmail.com)
-
