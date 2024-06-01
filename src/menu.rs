@@ -87,7 +87,6 @@ pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<St
         // Use tokio::spawn to stop the log service
         "2" => {
 
-            
             println!("Available running log services to stop:");
             view_running_logs(log_services.clone());
             let services = log_services.lock().unwrap();
