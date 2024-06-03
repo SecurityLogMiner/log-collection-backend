@@ -48,16 +48,28 @@ pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<St
                 println!("No available logs to start.");
                 return;
             }
-            
+
+            // Look for the available logs that have not been started
+            // clone the log_services to pass it to the start_log_service
+            let services = log_services.lock().unwrap();
+            let filtered_logs: Vec<_> = available_logs
+                .into_iter()
+                .filter(|log| !services.contains_key(log))
+                .collect();
+            if filtered_logs.is_empty() {
+                println!("No available logs to start. All logs are already running.");
+                return;
+            }
+
             println!("Available log services to start:");
-            for (index, log) in available_logs.iter().enumerate() {
+            for (index, log) in filtered_logs.iter().enumerate() {
                 println!("{}. {}", index + 1, log);
             }
 
             let log_choice = read_input("Enter the number of the log service to start: ");
             if let Ok(index) = log_choice.parse::<usize>() {
-                if index > 0 && index <= available_logs.len() {
-                    let service_name = available_logs[index - 1].clone();
+                if index > 0 && index <= filtered_logs.len() {
+                    let service_name = filtered_logs[index - 1].clone();
                     let log_services = log_services.clone();
                     tokio::spawn(async move {
                         start_log_service(service_name, log_services).await;
@@ -74,13 +86,10 @@ pub async fn handle_menu_choice(choice: &str, log_services: Arc<Mutex<HashMap<St
         // Grab the name of the log service based on the index
         // Use tokio::spawn to stop the log service
         "2" => {
-            let services = log_services.lock().unwrap();
-            if services.is_empty() {
-                println!("No running log services to stop.");
-                return;
-            }
 
             println!("Available running log services to stop:");
+            view_running_logs(log_services.clone());
+            let services = log_services.lock().unwrap();
             let service_names: Vec<_> = services.keys().cloned().collect();
             drop(services); // Release the lock before awaiting
             let log_choice = read_input("Enter the number of the log service to stop: ");

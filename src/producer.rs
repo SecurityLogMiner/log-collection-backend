@@ -109,8 +109,10 @@ pub fn view_running_logs(log_services: Arc<Mutex<HashMap<String, watch::Sender<(
         println!("No running log services.");
     } else {
         println!("Currently running log services:");
+        let mut i = 0;
         for (service_name, _) in services.iter() {
-            println!("- {}", service_name);
+            i += 1;
+            println!("{}. {}", i, service_name);
         }
     }
 }
